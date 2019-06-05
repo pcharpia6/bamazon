@@ -44,7 +44,6 @@ function buyWhat() {
         validate: function(buy_quant) {return  buy_quant == buy_quant.trim()}
         }
         ]).then((res) => {
-            console.log("buywhat response: " + res);
             stockQuant(res);
         })
 };
@@ -74,10 +73,10 @@ function pullStock(input, input2) {
     connection.query(
         "UPDATE products SET ? WHERE ?",
         [{
-            stock_quantity: (input2[0].stock_quantity - input.buy_quant)
+            stock_quantity: input2[0].stock_quantity - input.buy_quant
         },
         {
-            item_id: input.item_id
+            item_id: input.buy_id
         }],
         function(err, res) {
             // console.log(res);
@@ -85,6 +84,7 @@ function pullStock(input, input2) {
             console.log(input2[0].stock_quantity - input.buy_quant + " of those items remain.\nThank you for your purchase!")
         }
     );
+    connection.end();
 }
 
 // function begin() {
