@@ -17,11 +17,13 @@ connection.connect(function(err) {
 
 function beginBuy() {
     connection.query(
-        "SELECT item_id, product_name, price FROM products",
+        "SELECT item_id, product_name, price, stock_quantity FROM products",
         function(err, res) {
             if (err) throw err;
-            console.log("ITEMS FOR SALE:\n")
-            for (let i = 0; i < res.length; i++) {console.log(res[i])}
+            console.log("ITEMS FOR SALE:\n");
+            for (let i = 0; i < res.length; i++)  {
+                console.log("ID: " + res[i].item_id + ", Name: " + res[i].product_name + ", Price for Each: " + res[i].price + ", # Available: " + res[i].stock_quantity + "\n");
+            };
             buyWhat();
         }
     )
@@ -57,7 +59,7 @@ function stockQuant(input) {
             if (err) throw err;
             let stock = res[0].stock_quantity;
             if (parseInt(stock) >= parseInt(input.buy_quant)) {
-                pullStock(input);
+                pullStock(input, res);
                 console.log("Your purchase is successful.")
             } else {
                 console.log(parseInt(parseInt(input.buy_quant)));
@@ -68,77 +70,85 @@ function stockQuant(input) {
     );
 };
 
-function pullStock(input) {
+function pullStock(input, input2) {
     connection.query(
-        "UPDATE stock_quantity FROM products WHERE ?",
+        "UPDATE products SET ? WHERE ?",
+        [{
+            stock_quantity: (input2[0].stock_quantity - input.buy_quant)
+        },
         {
             item_id: input.item_id
+        }],
+        function(err, res) {
+            // console.log(res);
+            if (err) throw err;
+            console.log(input2[0].stock_quantity - input.buy_quant + " of those items remain.\nThank you for your purchase!")
         }
-    )
+    );
 }
 
-function begin() {
-    Inquirer.prompt([
-        {type: "list",
-        message: "What would you like to do?\n",
-        choices: ["SELL AN ITEM", "BUY AN ITEM", "EXIT"],
-        name: "task"}
-    ]).then((res) => {
-        if (res.task == "SELL AN ITEM") {
-            sellItem();
-        } else if (res.task == "BUY AN ITEM") {
-            buyItem();
-        } else {
-            connection.end();
-        }
-    })
-};
+// function begin() {
+//     Inquirer.prompt([
+//         {type: "list",
+//         message: "What would you like to do?\n",
+//         choices: ["SELL AN ITEM", "BUY AN ITEM", "EXIT"],
+//         name: "task"}
+//     ]).then((res) => {
+//         if (res.task == "SELL AN ITEM") {
+//             sellItem();
+//         } else if (res.task == "BUY AN ITEM") {
+//             buyItem();
+//         } else {
+//             connection.end();
+//         }
+//     })
+// };
 
-var sellItem = function() {
-    let item = "";
-    let price = 0;
-    askName();
-    function askName() {
-        Inquirer.prompt([
-            {type: "input",
-            message: "What is the name of the item?\n",
-            name: "name",
-            validate: function(name) {return  name == name.trim()}
-            },
-            {type: "input",
-            message: "What department does the item belong in?\n",
-            name: "dept",
-            validate: function(dept) {return  dept == dept.trim()}
-            },
-            {type: "input",
-            message: "What is your asking price for this item?\n",
-            name: "price",
-            validate: function(price) {return price == parseInt(price.trim())}},
-            {type: "input",
-            message: "How many of this item are for sale?\n",
-            name: "quant",
-            validate: function(quant) {return quant == parseInt(quant.trim())}}
-        ]).then((ent) => {
-            pushItem(ent);
-        })
-    };
-    function pushItem(ent) {
-        connection.query(
-            "INSERT INTO products SET ?",
-            {
-                product_name: ent.name.toUpperCase(),
-                department_name: ent.dept.toUpperCase(),
-                price: ent.price.toUpperCase(),
-                stock_quantity: ent.quant.toUpperCase()
-            },
-            function(err, res) {
-                if (err) throw err;
-                console.log("Your item(s) were added successfully.");
-            }
-        )
-    }
-};
+// var sellItem = function() {
+//     let item = "";
+//     let price = 0;
+//     askName();
+//     function askName() {
+//         Inquirer.prompt([
+//             {type: "input",
+//             message: "What is the name of the item?\n",
+//             name: "name",
+//             validate: function(name) {return  name == name.trim()}
+//             },
+//             {type: "input",
+//             message: "What department does the item belong in?\n",
+//             name: "dept",
+//             validate: function(dept) {return  dept == dept.trim()}
+//             },
+//             {type: "input",
+//             message: "What is your asking price for this item?\n",
+//             name: "price",
+//             validate: function(price) {return price == parseInt(price.trim())}},
+//             {type: "input",
+//             message: "How many of this item are for sale?\n",
+//             name: "quant",
+//             validate: function(quant) {return quant == parseInt(quant.trim())}}
+//         ]).then((ent) => {
+//             pushItem(ent);
+//         })
+//     };
+//     function pushItem(ent) {
+//         connection.query(
+//             "INSERT INTO products SET ?",
+//             {
+//                 product_name: ent.name.toUpperCase(),
+//                 department_name: ent.dept.toUpperCase(),
+//                 price: ent.price.toUpperCase(),
+//                 stock_quantity: ent.quant.toUpperCase()
+//             },
+//             function(err, res) {
+//                 if (err) throw err;
+//                 console.log("Your item(s) were added successfully.");
+//             }
+//         )
+//     }
+// };
 
-var buyItem = function() {
+// var buyItem = function() {
 
-}
+// }
