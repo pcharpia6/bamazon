@@ -28,19 +28,19 @@ function beginBuy() {
             for (let i = 0; i < res.length; i++)  {
                 console.log("ID: " + res[i].item_id + ", Name: " + res[i].product_name + ", Price for Each: $" + res[i].price + ", # Available: " + res[i].stock_quantity + "\n");
             };
-            buyWhat();
+            buyWhat(res);
         }
     )
 };
 
 // request user input for the item to purchase based on the ID listed in beginBuy()
-function buyWhat() {
+function buyWhat(input) {
     Inquirer.prompt([
         {
         type: "input",
         message: "What is the ID of the item you would like to buy?\n",
         name: "buy_id",
-        validate: function(buy_id) {return buy_id == parseInt(buy_id.trim())}
+        validate: function(buy_id) {return (buy_id == parseInt(buy_id.trim()) && buy_id <= input.length && buy_id > 0)}
         },
         {
         type: "input",
